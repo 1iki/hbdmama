@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        @keyframes flicker {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.1, 0.9); opacity: 0.8; }
+        }
+        @keyframes balloonFloat {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px) rotate(360deg); opacity: 1; }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            animation: confetti 5s linear forwards;
+            z-index: 1000;
+        }
+        .balloon {
+            position: fixed;
+            width: 40px;
+            height: 50px;
+            border-radius: 50%;
+            animation: balloonFloat 15s linear forwards;
+            z-index: 10;
+        }
+        .balloon:before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 15px;
+            background-color: rgba(0,0,0,0.2);
+        }
+        .photo-frame {
+            border: 8px solid white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: rotate(-2deg);
+            transition: all 0.3s ease;
+        }
+        .photo-frame:hover {
+            transform: rotate(2deg) scale(1.02);
+        }
+        .flame {
+            width: 8px;
+            height: 15px;
+            background: linear-gradient(to bottom, #ff7800, #ff0);
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 10px #ff0, 0 0 20px #ff7800;
+            animation: flicker 0.5s infinite alternate;
+        }
+        .message-bubble {
+            position: relative;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .message-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #fff transparent;
+        }
+        body {
+            touch-action: manipulation;
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-pink-100 to-purple-100 min-h-screen flex flex-col items-center p-4 overflow-x-hidden">
+    <!-- Audio Element -->
+    <audio id="birthdaySong" loop>
+        <source src="https://drive.usercontent.google.com/download?id=1d6S1PpO4ggtOXrNkw_LveF_ID6CfSB_-&export=download&auditContext=prefetch&authuser=0&confirm=t&uuid=033f78a2-c2d4-48ae-b7f9-edcc1867c203&at=APcmpozpONFP-JMS7AG0Z9jc0hke:1745995927871" type="audio/mpeg">
+    </audio>
+    
+    <!-- Music Control Button -->
+    <button id="musicToggle" class="fixed top-4 right-4 z-50 bg-white rounded-full p-3 shadow-lg hover:bg-pink-100 transition-all">
+        <i class="fas fa-volume-up text-pink-500"></i>
+    </button>
+    
+    <!-- Main Content -->
+    <div class="w-full max-w-md">
+        <!-- Birthday Header -->
+        <div class="text-center mb-6 relative">
+            <h1 class="text-4xl font-bold text-pink-600 mb-2">Selamat Ulang Tahun Mama!</h1>
+            <div class="flex justify-center">
+                <div class="w-12 h-1 bg-pink-400 rounded-full"></div>
+            </div>
+        </div>
+        
+        <!-- Birthday Person Photo -->
+        <div class="flex justify-center mb-6">
+            <div class="photo-frame bg-white rounded-lg overflow-hidden w-48 h-48 relative">
+                <!-- Replace with actual birthday person's photo -->
+                <img src="https://lh3.googleusercontent.com/fife/ALs6j_FvKejvmu4wjBtE-B-xub0wdiauNcDaYpNaa_188r31ZLP_ZXYCJkOpkaobfThMpY_jxcuGWrX5RD7sbWapSsGYVAieiya5SHtPwaIWFTiOqRdnRT7RY4O1dMww5kwA3jwJwKhNW7FsB452R8ml_apLpzvCHPb9YTdn3PWJ2xrF_8dbpSNiIwHf-zWPXbBqYj6jpeswSh40TbwjCmVwdkhN8jAez3rLHOaB0DzfauRtzxl3p_zeJ8Mu-QOzZm2UjpK9oeuLGP4taAyXbgwFovlqU0mWeQ7e_N-Q4U_5sSndKyjphDht2H9EMdjeeyeyKmPWiauZAaEq-aXDlRuIqj_7-M6ikBURTxzgBRlRJD-mLaJZ8_DOGXDkIUWfSsQBhCOqQfqIJwPqpGwI6MqXkkHKChc81ng3wmYgZv6SuOe0xA3y_Ja6LXfDjOkuhig9im88634OzizH-X08O5NqJMpcZyAoXamNKbY5alqqJ3kRdi5gL_w_DvJ7FhBbn1ZVgmRPJ3DQ4_PhgOlm5MJ7onQLNQBMwYnyjDxa0I5Jg5B3Wv4IvgIWW-jamJL5g0sa4Lc6WRz1_WxgLvsbnV665p-jWIHoFke49oF4_m56BA1oUe5AWQPfnyAkqX54T3QGtHynesM5qzd9nYVdZjuLKJI6FGpGtaztsURQN8Uvbqh4fRo42_w1fVEqlf3AmXPywtLOvDGqgJsVfz_ga4tY-qmR_z_VCAv3gQeb66x_Ax5_uA7PDKsFo8cx_ZeDK9d5uNMsrUQJitxZhwwtohR_cISP2u3La4r4tVAfJA6kAmr8a6pt3Xj7_Jh4R5Hfyf8lmEdp7UVe0jAjeIu7Nz95SqWBEvq5mYwAY6z01NzF6nv0uRGtexnMuX4G1RumWc9x1P_7Y43vpdeIp6J-27Hl307N5LUvTohogxkBHXyIXu9jTl83uIHwfqnHmOiNlekRq80uZB18U6ndybDp51MMmD2TG9cQA_12u-BFaUz8hjO3V9Lqtuz6ubZ3F9CXM5nkGnDkzLJdKj6lqNb1AeAOzc3EIvXhcI6PmT8MbpggQMEtQHaBZYmYhvAKVC2OONg7cu2ruueyLa9Ttq76vMn6YM46BJjrXmTqJxo0zZzo8Rp81WKNt9KKVra5FFXCESUfha-WhFkGhaouXDh8Zv8yGMFEoJxT8zdFMHr1zCRl1ZyP8J8G1YtNa-U2r_iXe08jJ_ni3yqbtxTmnICb3IUN56NUjSut5PKn1zJTwuKryXrmsg2Pno0U-HOtD3kK0jTsz0ADCh17W2cj6bNZnH0_wZxEEp4qN-zBN8JwpGv4w8HbaDd2xFnwgyOU78RCrsr5yAgkNdTIYiTMwH9l3QJghE-8CC21LxOr0vVgoFO6FXeJ_JL5t0hNJjomHsY0L3-T2drNwsmiFE2c2npWN5V_kkgaBTr1910Iu-dl-Eu4Hy2JlwZRHYFHmouFsY5WwtLczg3hvpkJjM5_blCuX2ETVsacwKBy9otHAjUciDrK1tDiLZk9E9r7_ch17WEd_PPgeuL6AgQGLOwif6BIfSi_UH-hbbcE8cTJ2-V81w4hc7X4gdGIj-T7vTs5gNJ4CZbIfuQnRoK6jMBlheqbYLcA-lyG4ykzAk24q-hE3asVnRiBmsUb63Pd1qJnnyrMlt0dDgT-XSJBxuO6r3QNy3eRUyDUhiIsmn0AGaKfTQK5pbQxO2e9JCNQLuNPUqpEPQIysQAj0gyq50vRdhYen60UkcaUoiAQQFXOPltTfpW3JvvAt_l4avc0Nzn1m4suyYMZt14JVfIPQVpTak5N2QSxToIRzhW08tFXcLzYhqtD__uMvBsNc8ycQRzKAeicRJpnFUMgJsTFdfAt=w1920-h957?auditContext=prefetch" 
+                     alt="Birthday Person" class="w-full h-full object-cover">
+                <div class="absolute -bottom-3 -right-3 bg-pink-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
+                    <i class="fas fa-birthday-cake"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Birthday Cake Animation -->
+        <div class="flex justify-center mb-6">
+            <div class="relative">
+                <div class="w-24 h-16 bg-gradient-to-b from-pink-200 to-pink-300 rounded-lg shadow-md relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <div class="w-2 h-8 bg-gradient-to-b from-yellow-100 to-yellow-300 rounded-sm"></div>
+                        <div class="flame absolute -top-4 left-1/2 transform -translate-x-1/2"></div>
+                    </div>
+                </div>
+                <div class="w-32 h-12 bg-gradient-to-b from-pink-100 to-pink-200 rounded-lg shadow-md -mt-2"></div>
+                <div class="w-36 h-10 bg-gradient-to-b from-pink-50 to-pink-100 rounded-lg shadow-md -mt-1"></div>
+            </div>
+        </div>
+        
+        <!-- Birthday Message -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
+            <div class="text-center">
+                <p class="text-lg text-gray-700 mb-4">Terima kasih telah menjadi cahaya dan kekuatan dalam hidupku selama ini. Di usia Mama yang ke-48 ini, aku berdoa semoga Allah selalu melimpahkan kesehatan, kebahagiaan, dan umur panjang yang penuh berkah untuk Mama.
+                    Maafkan aku karena sampai hari ini belum bisa menjadi anak yang Mama banggakan. Aku sadar masih banyak kekurangan, tapi aku tidak akan berhenti berusaha untuk menjadi pribadi yang lebih baik dan bisa membahagiakan Mama.
+                    Doaku, semoga segala harapan dan impian Mama selalu dimudahkan jalannya, dan semoga aku bisa menjadi salah satu alasan Mama tersenyum setiap harinya. Aku sayang Mama, selalu sayang Mama!</p>
+                <div class="flex justify-center space-x-2">
+                    <span class="text-2xl">🎁</span>
+                    <span class="text-2xl">🎂</span>
+                    <span class="text-2xl">🎈</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reply Form -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-pink-600 mb-4 text-center">Kirim Pesan Doa</h2>
+            <form id="messageForm" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamu</label>
+                    <input type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 p-2 border">
+                </div>
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700">Pesan Doa</label>
+                    <textarea id="message" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 p-2 border"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-full transition duration-300 flex items-center justify-center">
+                    <i class="fas fa-paper-plane mr-2"></i> Kirim Pesan Dan Doa
+                </button>
+            </form>
+        </div>
+        
+        <!-- Messages Display -->
+        <div id="messagesContainer" class="space-y-4 w-full">
+            <h2 class="text-xl font-bold text-pink-600 mb-4 text-center">Pesan dan Doa</h2>
+            <!-- Sample messages will be added here by JavaScript -->
+        </div>
+    </div>
+    
+    <!-- Floating Decorations -->
+    <div class="fixed top-10 left-5 text-4xl text-pink-400 floating" style="animation-delay: 0s;">🎈</div>
+    <div class="fixed top-20 right-8 text-5xl text-purple-400 floating" style="animation-delay: 0.5s;">🎈</div>
+    <div class="fixed bottom-20 left-8 text-6xl text-blue-400 floating" style="animation-delay: 1s;">🎈</div>
+    <div class="fixed bottom-10 right-5 text-4xl text-yellow-400 floating" style="animation-delay: 1.5s;">🎈</div>
+    
+    <script>
+        // Database simulation (in a real app, this would be server-side)
+        let messagesDB = [
+            { name: "Fachri", message: "Selamat Ulang Tahun Mama!, Mama Hebat!", timestamp: new Date().toISOString() },
+            { name: "Fachri", message: "Fai Harap Tujuan Dan Doa-Doa Mama Terkabulkan", timestamp: new Date().toISOString() }
+        ];
+        
+        // DOM Elements
+        const musicToggle = document.getElementById('musicToggle');
+        const birthdaySong = document.getElementById('birthdaySong');
+        const messageForm = document.getElementById('messageForm');
+        const messagesContainer = document.getElementById('messagesContainer');
+        
+        // Music control
+        let isMusicPlaying = false;
+        musicToggle.addEventListener('click', () => {
+            isMusicPlaying = !isMusicPlaying;
+            if (isMusicPlaying) {
+                birthdaySong.play();
+                musicToggle.innerHTML = '<i class="fas fa-volume-up text-pink-500"></i>';
+            } else {
+                birthdaySong.pause();
+                musicToggle.innerHTML = '<i class="fas fa-volume-mute text-pink-500"></i>';
+            }
+        });
+        
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
+                confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                document.body.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // Create floating balloons
+        function createBalloon() {
+            const colors = [
+                'rgba(255, 0, 0, 0.7)',    // Red
+                'rgba(0, 255, 0, 0.7)',    // Green
+                'rgba(0, 0, 255, 0.7)',    // Blue
+                'rgba(255, 255, 0, 0.7)',  // Yellow
+                'rgba(255, 0, 255, 0.7)',  // Magenta
+                'rgba(0, 255, 255, 0.7)'   // Cyan
+            ];
+            
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            balloon.style.left = Math.random() * 80 + 10 + 'vw';
+            balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            balloon.style.animationDuration = Math.random() * 10 + 15 + 's';
+            document.body.appendChild(balloon);
+            
+            // Remove balloon after animation
+            setTimeout(() => {
+                balloon.remove();
+            }, 15000);
+        }
+        
+        // Start balloon animation every 7 seconds
+        function startBalloonAnimation() {
+            createBalloon(); // Create first balloon immediately
+            setInterval(createBalloon, 7000); // Then create every 7 seconds
+        }
+        
+        // Display messages
+        function displayMessages() {
+            messagesContainer.innerHTML = '<h2 class="text-xl font-bold text-pink-600 mb-4 text-center">Doa dan Pesan-Pesan</h2>';
+            
+            if (messagesDB.length === 0) {
+                messagesContainer.innerHTML += '<p class="text-gray-500 text-center">No messages yet. Be the first to wish!</p>';
+                return;
+            }
+            
+            messagesDB.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message-bubble p-4 bg-white rounded-lg shadow-md';
+                messageElement.innerHTML = `
+                    <div class="font-bold text-pink-600">${msg.name}</div>
+                    <div class="text-gray-700">${msg.message}</div>
+                    <div class="text-xs text-gray-400 mt-2">${new Date(msg.timestamp).toLocaleString()}</div>
+                `;
+                messagesContainer.appendChild(messageElement);
+            });
+        }
+        
+        // Handle form submission
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const message = document.getElementById('message').value.trim();
+            
+            if (!name || !message) {
+                alert('Please enter both your name and message!');
+                return;
+            }
+            
+            // Add to "database"
+            messagesDB.push({
+                name,
+                message,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Clear form
+            document.getElementById('name').value = '';
+            document.getElementById('message').value = '';
+            
+            // Update display
+            displayMessages();
+            
+            // Create celebration effect
+            createConfetti();
+            
+            // Play sound if not already playing
+            if (!isMusicPlaying) {
+                isMusicPlaying = true;
+                birthdaySong.play();
+                musicToggle.innerHTML = '<i class="fas fa-volume-up text-pink-500"></i>';
+            }
+            
+            // Scroll to the new message
+            messagesContainer.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Initial display
+        displayMessages();
+        
+        // Start balloon animation
+        startBalloonAnimation();
+        
+        // Auto-create some confetti on load
+        setTimeout(createConfetti, 1000);
+        setTimeout(createConfetti, 3000);
+        
+        // Prevent zooming on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.scale !== 1) { e.preventDefault(); }
+        }, { passive: false });
+    </script>
+</body>
+</html>
