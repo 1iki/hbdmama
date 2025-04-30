@@ -90,12 +90,21 @@
             touch-action: manipulation;
             overflow-x: hidden;
         }
+        .form-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .form-container.open {
+            max-height: 500px;
+            transition: max-height 0.5s ease-in;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-b from-pink-100 to-purple-100 min-h-screen flex flex-col items-center p-4 overflow-x-hidden">
     <!-- Audio Element -->
     <audio id="birthdaySong" loop>
-        <source src="https://drive.usercontent.google.com/download?id=1d6S1PpO4ggtOXrNkw_LveF_ID6CfSB_-&export=download&auditContext=prefetch&authuser=0&confirm=t&uuid=033f78a2-c2d4-48ae-b7f9-edcc1867c203&at=APcmpozpONFP-JMS7AG0Z9jc0hke:1745995927871" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
     
     <!-- Music Control Button -->
@@ -127,7 +136,7 @@
         
         <!-- Birthday Cake Animation -->
         <div class="flex justify-center mb-6">
-            <div class="relative">
+            <div class="relative flex flex-col items-center">
                 <div class="w-24 h-16 bg-gradient-to-b from-pink-200 to-pink-300 rounded-lg shadow-md relative">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <div class="w-2 h-8 bg-gradient-to-b from-yellow-100 to-yellow-300 rounded-sm"></div>
@@ -154,22 +163,31 @@
             </div>
         </div>
         
-        <!-- Reply Form -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
-            <h2 class="text-xl font-bold text-pink-600 mb-4 text-center">Kirim Pesan Doa</h2>
-            <form id="messageForm" class="space-y-4">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamu</label>
-                    <input type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 p-2 border">
-                </div>
-                <div>
-                    <label for="message" class="block text-sm font-medium text-gray-700">Pesan Doa</label>
-                    <textarea id="message" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 p-2 border"></textarea>
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-full transition duration-300 flex items-center justify-center">
-                    <i class="fas fa-paper-plane mr-2"></i> Kirim Pesan Dan Doa
-                </button>
-            </form>
+        <!-- Wish Button -->
+        <div class="flex justify-center mb-6">
+            <button id="wishButton" class="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 flex items-center justify-center">
+                <i class="fas fa-paper-plane mr-2"></i> Kirim Pesan Doa
+            </button>
+        </div>
+        
+        <!-- Reply Form (Hidden by default) -->
+        <div id="formContainer" class="form-container bg-white rounded-2xl shadow-xl mb-6">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-pink-600 mb-4 text-center">Kirim Pesan Doa</h2>
+                <form id="messageForm" class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nama Kamu</label>
+                        <input type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 p-2 border">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">Pesan Doa</label>
+                        <textarea id="message" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 p-2 border"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-full transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-paper-plane mr-2"></i> Kirim Pesan Dan Doa
+                    </button>
+                </form>
+            </div>
         </div>
         
         <!-- Messages Display -->
@@ -188,7 +206,7 @@
     <script>
         // Database simulation (in a real app, this would be server-side)
         let messagesDB = [
-            { name: "Fachri", message: "Selamat Ulang Tahun Mama!, Mama Hebat!", timestamp: new Date().toISOString() },
+        { name: "Fachri", message: "Selamat Ulang Tahun Mama!, Mama Hebat!", timestamp: new Date().toISOString() },
             { name: "Fachri", message: "Fai Harap Tujuan Dan Doa-Doa Mama Terkabulkan", timestamp: new Date().toISOString() }
         ];
         
@@ -197,6 +215,8 @@
         const birthdaySong = document.getElementById('birthdaySong');
         const messageForm = document.getElementById('messageForm');
         const messagesContainer = document.getElementById('messagesContainer');
+        const wishButton = document.getElementById('wishButton');
+        const formContainer = document.getElementById('formContainer');
         
         // Music control
         let isMusicPlaying = false;
@@ -208,6 +228,18 @@
             } else {
                 birthdaySong.pause();
                 musicToggle.innerHTML = '<i class="fas fa-volume-mute text-pink-500"></i>';
+            }
+        });
+        
+        // Toggle form visibility
+        wishButton.addEventListener('click', () => {
+            formContainer.classList.toggle('open');
+            
+            // Scroll to form if opening
+            if (formContainer.classList.contains('open')) {
+                setTimeout(() => {
+                    formContainer.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
             }
         });
         
@@ -290,7 +322,7 @@
             const message = document.getElementById('message').value.trim();
             
             if (!name || !message) {
-                alert('Please enter both your name and message!');
+                alert('Mohon masukan nama dan pesan 🤗');
                 return;
             }
             
@@ -304,6 +336,9 @@
             // Clear form
             document.getElementById('name').value = '';
             document.getElementById('message').value = '';
+            
+            // Close form
+            formContainer.classList.remove('open');
             
             // Update display
             displayMessages();
@@ -319,7 +354,9 @@
             }
             
             // Scroll to the new message
-            messagesContainer.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+                messagesContainer.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
         });
         
         // Initial display
